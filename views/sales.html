@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Ventas de Productos</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+            crossorigin="anonymous"
+        />
+    </head>
+    <body>
+        <div class="container" style="padding-top: 2em;">
+
+            <div class="row">
+                <div class="col-md-4 offset-md-4">
+                    <form id="salesForm">
+                        <div class="form-group">
+                            <label for="product">Producto</label>
+                            <select id="product" class="form-control" name="product">
+                                {% for row in products %}
+                                    <option value="{{row.id}}" data-precio="{{row.precio}}">{{row.nombre}} </option>
+                                {% endfor %}
+                            </select> 
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Cantidad</label>
+                            <input type="number" name="quantity" id="quantity" min="1" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <input type="hidden" name="sell" id="sell">
+                            <input type="hidden" name="price" id="price">
+                        </div>
+                        <div class="form-group" style="text-align: right;">
+                            <br>
+                            <button class="btn-default btn" type="button" onclick="location.href='./products';">Volver</button>
+                            <button class="btn-primary btn" type="button" onclick="sellProduct(this);">Vender</button>
+                       
+                        </div>
+                    </form>
+                </div>
+            </div>    
+
+        </div>
+        
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"
+        ></script>
+
+        <script>
+
+            function sellProduct()
+            {
+
+
+                let producto = document.getElementById('product');
+                document.getElementById('price').value =  +producto.options[producto.selectedIndex].dataset.precio;
+
+                const http = new XMLHttpRequest();
+
+                http.open("POST", './sales');
+
+                http.onreadystatechange = function (){
+
+                    if(this.readyState === 4 && this.status === 200) {
+                        
+                        let response = JSON.parse(this.responseText);
+                        if(response.message == 'insufficient stock!'){
+
+                            alert("No hay unidades suficientes!");
+                        } else if (response.sold){
+
+                            alert("Venta completada exitosamente!");
+                        }
+                    }
+                    
+                    formReference.reset();
+                    
+                }
+
+                let formReference = document.getElementById("salesForm");
+                let salesData = new FormData(formReference);                
+                http.send(salesData);
+            }
+        </script>
+    </body>
+</html>

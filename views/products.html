@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Coffee Shop</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+            crossorigin="anonymous"
+        />
+        <script type="text/javascript" src="./js/products.js">
+        </script>
+    </head>
+
+    <body>
+        <div
+            class="modal fade"
+            id="modal"
+            tabindex="-1"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">
+                            Edit Product
+                        </h5>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="productsForm">
+                            <div class="form-group">
+                                <label for="product">Producto</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    name="product"
+                                    id="product"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="reference">Referencia</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    name="reference"
+                                    id="reference"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="price">Precio</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    name="price"
+                                    id="price"
+                                    step="1"
+                                    min="1"
+                                />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="weight">Peso (Kg)</label>
+                                <input
+                                    type="number"
+                                    step=".01"
+                                    class="form-control"
+                                    name="weight"
+                                    min="0.1"
+                                    id="weight"
+                                />     
+                            </div>
+                            <div class="form-group">
+                                <label for="category">Categoria</label>
+                                <select id="category" class="form-control" name="category">
+                                    {% for row in categories %}
+                                        <option value="{{row.id}}">{{row.nombre}} </option>
+                                    {% endfor %}
+                                </select>    
+                            </div>
+                            <div class="form-group">
+                                <label for="stock">Stock</label>
+                                <input type="number" class="form-control" id="stock" step="1" min="1" name="stock">
+                            </div>
+                            <div class="form-group" id="modeWrapper" >
+                 
+                            </div>
+                            <div class="form-group">
+                                <input type="hidden" id="idRow" name="idRow">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            Cerrar
+                        </button>
+                        <button type="button" onclick="saveChanges()" class="btn btn-primary">
+                            Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container" style="padding-top:2em;">
+            <div class="row">
+                <div class="col-md-10 offset-md-1">
+                    <button class="btn btn-primary" onclick="createProduct()">Crear Producto</button>
+                    <button class="btn btn-default" onclick="location.href='./sales'">Vender Productos</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-10 offset-md-1">
+                    <table class="table" id="productsTable">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Producto</th>
+                                <th scope="col">Referencia</th>
+                                <th scope="col">Precio</th>
+                                <th scope="col">Peso</th>
+                                <th scope="col">Categoria</th>
+                                <th scope="col">Stock</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in products %}
+                            <tr data-id="{{row.id}}">
+                                <th scope="row">{{ row.id }}</th>
+                                <td>{{ row.producto }}</td>
+                                <td>{{ row.referencia }}</td>
+                                <td>{{ row.precio }}</td>
+                                <td>{{ row.peso }}</td>
+                                <td data-id="{{row.categoria_id}}">{{ row.categoria }}</td>
+                                <td>{{ row.stock }}</td>
+                                <td>{{ row.fecha_creacion }}</td>
+                                <td>
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary"
+    
+                                        onclick="editProduct({{row.id}})"
+                                    >
+                                        Editar
+                                    </button>
+                                    <button class="btn btn-danger" onclick="deleteProduct({{row.id}})">
+                                        Eliminar
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"
+        ></script>
+
+        <script>
+            mode = '';
+
+var myModal = new bootstrap.Modal(
+    document.getElementById("modal"),
+    {}
+);
+const bsAlert = new bootstrap.Alert('#succcess-event');
+
+bsAlert.close();
+
+var rowsValues = {
+    'products': '',
+    'reference': '',
+    'price': '',
+    'weight': '',
+    'category_id': '',
+    'category_name': '',
+    'stock': ''
+};
+
+var idRow = 0; 
+
+function editProduct(id) {
+
+    let tds = getActionRow(id);
+    mode = 'edition';
+    document.querySelector(".modal-dialog .modal-title").innerHTML = "Editar Producto";
+    document.getElementById("modeWrapper").innerHTML = '<input type="hidden" id="edit" name="edit" value="true">';
+
+    rowsValues.products = tds[0].innerText;
+    rowsValues.reference = tds[1].innerText;
+    rowsValues.price = tds[2].innerText;
+    rowsValues.weight = tds[3].innerText;
+    rowsValues.category_id = tds[4].dataset.id;
+    rowsValues.category_name = tds[4].innerText;
+    rowsValues.stock = tds[5].innerText;
+
+    document.querySelector("#product").value = rowsValues.products;
+    document.querySelector("#idRow").value = idRow;
+    document.querySelector("#reference").value = rowsValues.reference;
+    document.querySelector("#price").value = rowsValues.price;
+    document.querySelector("#weight").value = rowsValues.weight;
+    document.querySelector("#category").value = rowsValues.category_id;
+    document.querySelector("#stock").value = rowsValues.stock;
+
+    myModal.show();
+}
+
+function getActionRow(id){
+
+    idRow = id;
+    let row =  document.querySelector(`tr[data-id="${idRow}"]`);
+    return row.querySelectorAll('td');
+}
+
+function deleteProduct(id){
+
+    let tds = getActionRow(id);
+    let producto = tds[0].innerText;
+
+    let http = new XMLHttpRequest();
+    http.open('POST', "./products",true);
+    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+    http.onreadystatechange = function(){
+
+        if(this.readyState === 4 && this.status === 200) {
+        
+            if(JSON.parse(this.responseText).deleted){
+                document.querySelector(`tr[data-id="${idRow}"]`).remove();
+
+                alert("Producto eliminado!");
+            }
+        }
+    }
+
+    let params = JSON.stringify({
+        id: idRow
+    });
+
+    http.send('delete='+encodeURIComponent(params));
+}
+
+function createProduct(){
+
+    mode = "creation";
+    document.getElementById("productsForm").reset();
+    document.querySelector(".modal-dialog .modal-title").innerHTML = "Crear Producto";
+
+    document.getElementById("modeWrapper").innerHTML = '<input type="hidden" id="create" name="create" value="true">';
+
+    myModal.show();
+
+
+}
+
+function saveChanges(){
+
+    let myForm = document.getElementById("productsForm");
+    let formData = new FormData(myForm);
+
+    rowsValues.products = document.querySelector("#product").value;
+    rowsValues.reference = document.querySelector("#reference").value;
+    rowsValues.price =  document.querySelector("#price").value;
+    rowsValues.weight = document.querySelector("#weight").value;
+
+    let $category = document.querySelector("#category");
+    rowsValues.category_id = $category.value;
+    rowsValues.category_name = $category.options[$category.selectedIndex].text;
+    rowsValues.stock = document.querySelector("#stock").value;
+
+    var request = new XMLHttpRequest();
+    request.open("POST", "./products");
+
+    request.onreadystatechange = function() {
+        
+        if(this.readyState === 4 && this.status === 200) {
+
+            if(JSON.parse(this.responseText)?.updated){
+
+                let row =  document.querySelector(`tr[data-id="${idRow}"]`);
+                let tds = row.querySelectorAll('td');
+
+                tds[0].innerText = rowsValues.products;
+                tds[1].innerText = rowsValues.reference;
+                tds[2].innerText = rowsValues.price;
+                tds[3].innerText = rowsValues.weight;
+                tds[4].dataset.id = rowsValues.category_id;
+                tds[4].innerText =  rowsValues.category_name;
+                tds[5].innerText = rowsValues.stock;
+
+                alert("Producto actualizado!");
+
+                
+            } else if (JSON.parse(this.responseText)?.created){
+
+                alert("Nuevo producto creado!");
+                location.reload();
+            }
+
+            myModal.hide();
+        }
+    };
+
+
+    
+    request.send(formData);
+}
+        </script>
+    </body>
+</html>
